@@ -74,41 +74,36 @@ impl ServiceManager {
             // Por enquanto usamos sleep para não gastar 100% CPU
             time::sleep(1000).ok();
 
-            // Verificar status (Desativado por falta de sys_wait)
-            // self.check_services_vitality();
+            // Verificar status
+            self.check_services_vitality();
 
             // 2. Tentar reiniciar serviços falhos
             self.restart_failed_services();
         }
     }
 
-    #[allow(dead_code)]
     fn check_services_vitality(&mut self) {
         for i in 0..self.services.len() {
             let pid = self.services[i].pid;
-            if let Some(_p) = pid {
+            if let Some(p) = pid {
                 // Tenta esperar especificamente por este PID com timeout 0 (poll)
-                // Se retornar Ok, significa que ele terminou.
-                // TODO [User Request]: Reabilitar monitoramento quando sys_wait estiver pronto
-                /*
-                match wait(p, 0) {
+                match redpowder::process::wait(p, 0) {
                     Ok(exit_code) => {
                         self.handle_service_exit(i, exit_code);
                     }
-                    Err(redpowder::syscall::SysError::Timeout) => {
+                    Err(redpowder::syscall::SysError::NotFound) => {
                         // Ainda rodando, tudo ok
                     }
                     Err(e) => {
                         println!("[Supervisor] Erro ao monitorar PID {}: {:?}", p, e);
+                        // Se der erro crítico, assumimos que morreu para tentar recuperar
                         self.handle_service_exit(i, -1);
                     }
                 }
-                */
             }
         }
     }
 
-    #[allow(dead_code)]
     fn handle_service_exit(&mut self, index: usize, code: i32) {
         let svc = &mut self.services[index];
         println!(
