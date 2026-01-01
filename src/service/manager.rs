@@ -3,7 +3,7 @@
 use super::config::SERVICES;
 use super::defs::{RestartPolicy, ServiceState, ServiceStatus};
 use alloc::vec::Vec;
-use redpowder::process::{spawn, wait};
+use redpowder::process::spawn;
 use redpowder::{println, time};
 
 pub struct ServiceManager {
@@ -29,9 +29,9 @@ impl ServiceManager {
         for i in 0..self.services.len() {
             self.start_service(i);
 
-            // Pequeno delay para dar chance do serviço anterior inicializar sockets/ports
-            // Isso é um "poor man's dependency management"
-            time::sleep(100).ok();
+            // Delay removido pois estava causando travamento se o scheduler não voltasse
+            // rápido o suficiente. Melhor iniciar tudo e deixar eles se entenderem via IPC.
+            // time::sleep(100).ok();
         }
     }
 
@@ -69,29 +69,28 @@ impl ServiceManager {
         loop {
             // 1. Verificar processos filhos mortos (Reaping)
             // Timeout de 1000ms significa que acordamos a cada segundo mesmo se nada acontecer
-            match wait(0, 1000) {
-                Ok(_) => {
-                    // Algum filho morreu.
-                    // Ver nota anterior sobre API do redpowder: precisamos checar quem foi.
-                    self.check_services_vitality();
-                }
-                Err(_) => {
-                    // Timeout ou erro, apenas verifica vitalidade
-                    self.check_services_vitality();
-                }
-            }
+            // 1. Sleep loop
+            // TODO: Implementar sys_wait no kernel para usar wait(0, timeout)
+            // Por enquanto usamos sleep para não gastar 100% CPU
+            time::sleep(1000).ok();
+
+            // Verificar status (Desativado por falta de sys_wait)
+            // self.check_services_vitality();
 
             // 2. Tentar reiniciar serviços falhos
             self.restart_failed_services();
         }
     }
 
+    #[allow(dead_code)]
     fn check_services_vitality(&mut self) {
         for i in 0..self.services.len() {
             let pid = self.services[i].pid;
-            if let Some(p) = pid {
+            if let Some(_p) = pid {
                 // Tenta esperar especificamente por este PID com timeout 0 (poll)
                 // Se retornar Ok, significa que ele terminou.
+                // TODO [User Request]: Reabilitar monitoramento quando sys_wait estiver pronto
+                /*
                 match wait(p, 0) {
                     Ok(exit_code) => {
                         self.handle_service_exit(i, exit_code);
@@ -100,15 +99,16 @@ impl ServiceManager {
                         // Ainda rodando, tudo ok
                     }
                     Err(e) => {
-                        // Outro erro (talvez processo não exista mais)
                         println!("[Supervisor] Erro ao monitorar PID {}: {:?}", p, e);
                         self.handle_service_exit(i, -1);
                     }
                 }
+                */
             }
         }
     }
 
+    #[allow(dead_code)]
     fn handle_service_exit(&mut self, index: usize, code: i32) {
         let svc = &mut self.services[index];
         println!(
