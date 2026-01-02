@@ -30,12 +30,4 @@ pub const SERVICES: &[ServiceConfig] = &[
         restart_policy: RestartPolicy::Always,
         critical: true,
     },
-    // 4. Terminal (Opcional, mas útil)
-    ServiceConfig {
-        name: "terminal",
-        path: "/apps/system/terminal",
-        args: &[],
-        restart_policy: RestartPolicy::Always,
-        critical: false,
-    },
 ];
