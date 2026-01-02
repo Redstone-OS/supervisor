@@ -7,7 +7,6 @@ use super::defs::{RestartPolicy, ServiceConfig};
 pub const SERVICES: &[ServiceConfig] = &[
     // 1. Input Service (Teclado/Mouse)
     // Essencial iniciar antes da interface gráfica
-    /*
     ServiceConfig {
         name: "input",
         path: "/system/services/input",
@@ -15,7 +14,6 @@ pub const SERVICES: &[ServiceConfig] = &[
         restart_policy: RestartPolicy::Always,
         critical: true,
     },
-    */
     // 2. Firefly Compositor (Interface Gráfica)
     ServiceConfig {
         name: "firefly",
