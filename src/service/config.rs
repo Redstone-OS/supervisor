@@ -33,7 +33,7 @@ pub const SERVICES: &[ServiceConfig] = &[
     // 4. Terminal (Opcional, mas útil)
     ServiceConfig {
         name: "terminal",
-        path: "/system/services/terminal",
+        path: "/apps/system/terminal",
         args: &[],
         restart_policy: RestartPolicy::Always,
         critical: false,
