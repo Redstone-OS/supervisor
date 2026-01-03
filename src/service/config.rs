@@ -9,7 +9,7 @@ pub const SERVICES: &[ServiceConfig] = &[
     // Essencial iniciar antes da interface gráfica
     ServiceConfig {
         name: "input",
-        path: "/system/services/input",
+        path: "/system/services/input/input.app",
         args: &[],
         restart_policy: RestartPolicy::Always,
         critical: true,
@@ -17,7 +17,7 @@ pub const SERVICES: &[ServiceConfig] = &[
     // 2. Firefly Compositor (Interface Gráfica)
     ServiceConfig {
         name: "firefly",
-        path: "/system/services/firefly",
+        path: "/system/services/firefly/firefly.app",
         args: &[],
         restart_policy: RestartPolicy::Always,
         critical: true,
@@ -25,7 +25,7 @@ pub const SERVICES: &[ServiceConfig] = &[
     // 3. Shell (Desktop Environment)
     ServiceConfig {
         name: "shell",
-        path: "/system/services/shell",
+        path: "/system/services/shell/shell.app",
         args: &[],
         restart_policy: RestartPolicy::Always,
         critical: true,
